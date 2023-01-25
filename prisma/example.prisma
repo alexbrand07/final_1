@@ -1,0 +1,79 @@
+
+
+
+
+
+
+
+
+// model Shop {
+//   id        String        @id @db.Uuid //primarykey
+//   name      String        @db.VarChar(255)
+//   address   String
+//   // products  Product[]
+// }
+
+
+
+
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// generator client {
+//   provider = "prisma-client-js"
+//   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+//   // output   = "../generated/client"
+//   // binaryTargets = ["native", "darwin-arm64"]
+// }
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+// model Product {
+//   id              Int     @id @default(autoincrement())
+//   name            String
+//   description     String
+//   // categoryId      Int
+//   // shopId       String
+//   // shopBelongsTo Shop       @relation(fields: [shopId],references: [id])
+//   categories      CategoriesOnProduct[]
+//   categories      Category[]
+//   categoryBelongsTo Category @relation(fields: [categoryId], references: [id])
+// }
+// model Category {
+//   id                Int        @id @default(autoincrement())
+//   name              String        @unique
+//   productId         Int
+//   product           Product @relation(fields: [productId], references: [id])
+  
+//   categories        CategoriesOnProduct[]
+//   categoryId        Int
+//   categoryBelongsTo Product @relation(fields: [categoryId],references: [id])
+//   products          Product[] //MANY to MANY with Product model
+// }
+// model CategoriesOnProduct {
+//   id            Int      @id @default(autoincrement()) 
+//   product       Product     @relation(fields: [productId], references: [id])
+//   productId     Int // relation scalar field (used in the `@relation` attribute above)
+//   category      Category  @relation(fields: [categoryId], references: [id])
+//   categoryId    Int // relation scalar field (used in the `@relation` attribute above)
+// }
+
+
+
+
+
+
+
+
+
+// model Shop {
+//   id        String        @id @db.Uuid //primarykey
+//   name      String        @db.VarChar(255)
+//   address   String
+//   // products  Product[]
+// }
+
+

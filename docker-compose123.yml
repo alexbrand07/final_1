@@ -1,0 +1,18 @@
+version: '0.1'
+
+services: 
+    postgres:
+      image: postgres:latest
+      restart: unless-stopped
+      env_file: ./.env
+    app:
+      depends_on:
+       - postgres
+      build: ./final_1
+      restart: unless-stopped
+      env_file: ./.env
+      stdin_open: true
+      tty: true
+
+volumes:
+  db:

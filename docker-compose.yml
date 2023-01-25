@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=alexeykhorishko
+      - POSTGRES_PASSWORD=Vivi201219
+    ports:
+      - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/data
+  api:
+    container_name: final
+    build:
+      context: ./
+    image: api_final
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: alexeykhorishko
+      DB_PASSWORD: Vivi201219
+      DB_NAME: alexeykhorishko
+    volumes:
+      - './:/final_1'
+volumes:
+  db:
+    driver: local
