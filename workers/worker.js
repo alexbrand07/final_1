@@ -1,74 +1,43 @@
-// const { PrismaClient } = require('@prisma/client');
-// const prisma = new PrismaClient()
+// const worker = require('node:worker_threads');
+const worker = require("worker")
 
+const { Worker, isMainThread, parentPort } = require('worker_threads');
+const fs = require('fs');
+const path = require('path');
 
-// async function addProduct() {
-//     const newProduct = {
-//             name: "Adidas",
-//             description: "Nice and light",
-//             categories: [1,3,4],
-//             shop: {shopId:1},
-//             expirationDate: new Date(new Date().getTime() + 2* 60000),
-//         }
-//     await prisma.product.create({
-//         data:newProduct
-//     });
+if (isMainThread) {
+  const word = process.argv[2];
+  const directory = process.argv[3];
 
-//     console.log(`product has been added: ${newProduct.name}`);
-// }
+  // Read all the text files in the directory
+  fs.readdir(directory, (err, files) => {
+    if (err) throw err;
 
-// setInterval(addProduct, 1000 * 60);
+    const textFiles = files.filter(file => path.extname(file) === '.txt');
+    let globalCount = 0;
+    const workerCount = textFiles.length;
+    let workerFinishedCount = 0;
 
+    // Create a worker for each text file
+    for (const file of textFiles) {
+      const worker = new Worker(__filename, { workerData: { word, file, directory } });
+      worker.on('message', count => {
+        globalCount += count;
+        workerFinishedCount++;
 
-
-
-// const addProduct = async () => {
-//   const client = new Client({
-//     user: 'alexeykhorishko',
-//     host: 'localhost',
-//     database: 'alexeykhorishko',
-//     password: 'Vivi201219',
-//     port: 5432
-//   });
-  
-//   await client.connect();
-
-//   const query = 'INSERT INTO products(name, description, shopId) VALUES($1, $2)';
-//   const values = ['Product 1', "nice and light", 1];
-
-//   await client.query(query, values);
-  
-//   console.log('New product added to the database.');
-
-//   await client.end();
-// };
-
-// setInterval(addProduct, 3600000);
-
-
-
-
-
-
-
-// const axios = require("axios")
-
-// const addProduct = async () => {
-//     try {
-//         const product = {
-//             name : "Adidas",
-//             description: "Nice and light",
-//             shopId : 1
-//         };
-
-//         const response = await axios.post("http//localhost:3000/product", product);
-//         console.log(`Product added successfully: ${response.data.id}`);
-
-//     } catch (error) {
-//         console.error(`Error adding product: ${error.message}`);
-//     } 
-// };
-// setInterval(addProduct, 3600000);
-
-
-// module.exports = addProduct
+        // Once all workers have finished, display the global result
+        if (workerFinishedCount === workerCount) {
+          console.log(`The word "${word}" appears ${globalCount} times in the files`);
+        }
+      });
+    }
+  });
+} else {
+  // Worker thread
+  const { word, file, directory } = workerData;
+  fs.readFile(path.join(directory, file), 'utf8', (err, contents) => {
+    if (err) throw err;
+    const count = contents.split(word).length - 1;
+    parentPort.postMessage(count);
+  });
+}
