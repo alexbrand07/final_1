@@ -4,15 +4,18 @@ const app = require("../app");
 const { product } = require("../db/prismaClient");
 const { Shop } = require(".prisma/client")
 
-
 const mockCreate = jest.fn();
 const mockFindMany = jest.fn();
+const mockUpdate = jest.fn();
+const mockDeleteShop = jest.fn();
 
 jest.mock("@prisma/client", () => ({
   PrismaClient: jest.fn(() => ({
     shop: {
       create: (...args) => mockCreate(...args),
-      findMany: (...args) => mockFindMany(...args)
+      findMany: (...args) => mockFindMany(...args),
+      update: (...args) => mockUpdate(...args),
+      delete: (...args) => mockDeleteShop(...args)
     },
   })),
 }));
@@ -25,33 +28,15 @@ describe('GET /shops', () => {
     const expected = [
     {
       id: 1,
-      name: "Nike AIR",
+      name: "Lpa shop",
       description: "Good shoes for everyday use"
-    },
-    {
-      id: 2,
-      name: "Adidas Yeezy",
-      description: "Good shoes for everyday use, casual"
-    },
-    {
-      id: 3,
-      name: "Timberland",
-      description: "Good shoes for everyday, hiking, casual"
-    },
-    {
-      id: 4,
-      name: "Air Jordan",
-      description: "Good shoes for everyday use, casual"
     },
   ] 
     mockFindMany.mockReturnValueOnce(expected);
       const response = await request(app).get('/shops');
       expect(response.status).toBe(200);
       expect(response.body).toEqual([
-        {"description":"Good shoes for everyday use","id":1,"name":"Nike AIR"},
-        {"description":"Good shoes for everyday use, casual","id":2,"name":"Adidas Yeezy"},
-        {"description":"Good shoes for everyday, hiking, casual","id":3,"name":"Timberland"},
-        {"description":"Good shoes for everyday use, casual","id":4,"name":"Air Jordan"},
+        {"description":"Good shoes for everyday use","id":1,"name":"Lpa shop"}
       ]);
   });
 
@@ -105,6 +90,33 @@ it('should return 500 when db is down', async () => {
 });
 
 // //write tests for put and delete
+
+it('should update a shop', async () => {
+  expect.hasAssertions();
+  const id = 31;
+  const payload = {
+    name: "lpa",
+    description: "everyday use"
+  };
+  mockUpdate.mockResolvedValueOnce(payload);
+  const response = await request(app).put(`/shops/${id}`).send(payload);
+  expect(response.status).toBe(200);
+  expect(response.body).toStrictEqual(payload);
+});
+
+
+// TEST FOR DELETE METHOD
+
+it('should delete a shop', async () => {
+  expect.hasAssertions();
+  const id = 37;
+  mockDeleteShop.mockResolvedValueOnce({});
+  const response = await request(app).delete(`/shops/${id}`);
+  expect(response.status).toBe(200);
+  expect(response.body).toEqual({});
+});
+
+
 
 
 // describe('GET /products', () => {

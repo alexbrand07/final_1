@@ -6,13 +6,17 @@ const { Shop } = require("../node_modules/.prisma/client/index")
 
 
 const mockCreate = jest.fn();
+const mockUpdate = jest.fn();
 const mockFindMany = jest.fn();
+const mockDeleteProduct =jest.fn();
 
 jest.mock("@prisma/client", () => ({
   PrismaClient: jest.fn(() => ({
     product: {
       create: (...args) => mockCreate(...args),
-      findMany: (...args) => mockFindMany(...args)
+      findMany: (...args) => mockFindMany(...args),
+      update: (...args) => mockUpdate(...args),
+      delete: (...args) => mockDeleteProduct(...args)
     },
   })),
 }));
@@ -59,7 +63,6 @@ describe('GET /products', () => {
 
   it('should return 500 when db is not accessible', async () => {
     expect.hasAssertions();
-
     mockFindMany.mockRejectedValueOnce(new Error("db is down"));
       const response = await request(app).get('/products');
       expect(response.status).toBe(500);
@@ -71,7 +74,6 @@ describe('GET /products', () => {
 
 it('should create a product', async () => {
   expect.hasAssertions();
-  
   const payload =
   {
     id: 1,
@@ -81,7 +83,6 @@ it('should create a product', async () => {
     shopdId: 232
   };
   mockCreate.mockResolvedValueOnce(payload);
-
   const response = await request(app).post('/product').send(payload);
   expect(response.status).toBe(200);
   expect(response.body).toEqual(payload);
@@ -91,7 +92,6 @@ it('should create a product', async () => {
 
 it('should return 500 when db is down', async () => {
   expect.hasAssertions();
-  
   const payload =
   {
     id: 1,
@@ -100,15 +100,45 @@ it('should return 500 when db is down', async () => {
     categories: [32],
     shopdId: 232
   };
-  
   mockCreate.mockRejectedValueOnce(new Error("db is down"));
-
   const response = await request(app).post('/product').send(payload);
   expect(response.status).toBe(500);
   expect(response.body).toEqual({"error": "db is down" });
 });
 
+
 // //write tests for put and delete
+
+// TEST FOR PUT METHOD SUCCESS TEST
+it('should update a product', async () => {
+  expect.hasAssertions();
+  const id = 31;
+  const payload = {
+    name: "Nike AIR",
+    description: "Good shoes for everyday use",
+    categories: [32],
+    shopdId: 25
+  };
+  mockUpdate.mockResolvedValueOnce(payload);
+  const response = await request(app).put(`/products/${id}`).send(payload);
+  expect(response.status).toBe(200);
+  expect(response.body).toStrictEqual(payload);
+});
+
+
+// TEST FOR DELETE METHOD
+
+it('should delete a product', async () => {
+  expect.hasAssertions();
+  const id = 37;
+  mockDeleteProduct.mockResolvedValueOnce({});
+  const response = await request(app).delete(`/products/${id}`);
+  expect(response.status).toBe(200);
+  expect(response.body).toEqual({});
+});
+
+
+
 
 
 // describe('GET /products', () => {

@@ -69,6 +69,7 @@ router.delete("/shops/:id", async (req, res) => {
   try { const shop = await prisma.shop.delete({
     where: { id: Number(id) },
   });
+    console.log("shop has been deleted");
     res.json(shop)
   } catch (error) {
     console.error(error);

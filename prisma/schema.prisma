@@ -61,3 +61,11 @@ model logs {
   product_id       Int
   delete_at       DateTime
 }
+
+model HistoryProduct {
+  id              Int     @id @default(autoincrement())
+  prod_id         Int
+  name            String
+  description     String
+  delete_at       DateTime
+}

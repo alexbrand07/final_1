@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const prisma = require("../db/prismaClient");
 
-
 // POST PRODUCT
 router.post("/product", async (req,res) => {
   const { name, description, categories, shopId} = req.body;
@@ -65,35 +64,37 @@ router.get("/products/:id", async (req,res)=>{
 router.put("/products/:id", async(req,res)=>{
   const {id} = req.params;
   const { name, description} = req.body;
-  const result = await prisma.product.update({
+   const result = await prisma.product.update({
     where: { id: Number(id) },
     data: {
       name,
       description,
     },
-  })
-  res.json(result)
+  }) 
+  res.json(result) 
 })
 
-// DELETING EXPIRED PRODUCT
-router.delete("/products/cleanup", async(req,res) => {
-  const { count } = await prisma.product.deleteMany({
-    where: {
-      expirationDate: {
-        lte: new Date()
-      }
-    }
-  })
+// DELETING EXPIRED PRODUCT ALL 
+// router.delete("/products/cleanup", async(req,res) => {
+//   const { count } = await prisma.product.deleteMany({
+//     where: {
+//       expirationDate: {
+//         lte: new Date()
+//       }
+//     }
+//   })
   
-  res.json({cleaned:count})
-})
+//   res.json({cleaned:count})
+// })
 
-// DELETE ONE PRODUCT
+// DELETE ONE PRODUCT BY ID
 router.delete("/products/:id", async (req, res) => {
   const {id} = req.params
-  try { const deleted_products = await prisma.product.deleteMany({
+
+  try { const deleted_products = await prisma.product.delete({
     where: { id: Number(id) },
   });
+    console.log("Product has been deleted")
     res.json(deleted_products)
   } catch (error) {
     console.error(error);
@@ -102,6 +103,27 @@ router.delete("/products/:id", async (req, res) => {
 })
 
 // ENDPOINT THAT RUNS TRIGGER AND DELETES EXPIRED PRODUCT
+
+router.post('/delete/expired/all', async (req, res) => {
+  // const expired_d = req.body.expired_d;
+  const today = new Date();
+  const result = await prisma.$queryRaw`CALL public.deleteexpiredproducts( '2023-02-10' )`
+  console.log('Expired products deleted successfully.');
+  res.status(200).json({ message: 'Expired products deleted successfully.' });
+});
+
+
+
+module.exports = router;
+
+
+
+
+
+
+
+
+
 
 
 // router.post('/product/expired/all', async (req, res) => {
@@ -124,20 +146,6 @@ router.delete("/products/:id", async (req, res) => {
 //   });
 //   res.status(200).json({ message: 'Expired products deleted successfully.' });
 // });
-
-
-router.post('/delete/expired/all', async (req, res) => {
-  // const expired_d = req.body.expired_d;
-  const today = new Date();
-  const result = await prisma.$queryRaw`CALL public.deleteexpiredproducts( '2023-02-01' )`
-  // console.log('Expired products deleted successfully.');
-  res.status(200).json({ message: 'Expired products deleted successfully.' });
-});
-
-
-
-
-
 
 
 
@@ -181,4 +189,3 @@ router.post('/delete/expired/all', async (req, res) => {
 //     });
 // });
 
-module.exports = router;
