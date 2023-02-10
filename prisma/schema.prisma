@@ -4,6 +4,7 @@
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+  previewFeatures= ["referentialActions"]
   // output   = "../generated/client"
   // binaryTargets = ["native", "darwin-arm64"]
 }
@@ -11,12 +12,17 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model Product {
   id              Int     @id @default(autoincrement())
   name            String
   description     String
   categories      CategoriesOnProduct[]
-
+  shop            ShopsProduct[]
+  expirationDate  DateTime @default(now())
+  log             logs[]
+  
+  // i need to make trigger on that column. When expired needs to be deleted
 }
 model Category {
   id                Int        @id @default(autoincrement())
@@ -25,11 +31,41 @@ model Category {
   
 }
 model CategoriesOnProduct {
-  product       Product   @relation(fields: [productId], references: [id])
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId     Int 
-  category      Category  @relation(fields: [categoryId], references: [id])
+  category      Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId    Int
   
   @@id([productId, categoryId])
   
+}
+model Shop {
+  id              Int     @id @default(autoincrement())
+  name            String
+  description     String
+  products        ShopsProduct[]
+}
+model ShopsProduct {
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  Int
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopId     Int 
+  
+  @@id([productId, shopId])
+}
+
+
+model logs {
+  id              Int     @id @default(autoincrement())
+  product         Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product_id       Int
+  delete_at       DateTime
+}
+
+model HistoryProduct {
+  id              Int     @id @default(autoincrement())
+  prod_id         Int
+  name            String
+  description     String
+  delete_at       DateTime
 }
