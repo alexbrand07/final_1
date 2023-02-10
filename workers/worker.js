@@ -1,17 +1,20 @@
 // const worker = require('node:worker_threads');
-const worker = require("worker")
-
 const { Worker, isMainThread, parentPort } = require('worker_threads');
 const fs = require('fs');
 const path = require('path');
+const { workerData } = require("worker_threads");
 
 if (isMainThread) {
+  // const word = "backend"
   const word = process.argv[2];
-  const directory = process.argv[3];
+  const directory = path.resolve(process.argv[3]);
 
   // Read all the text files in the directory
   fs.readdir(directory, (err, files) => {
-    if (err) throw err;
+    console.log("im here")
+    if (err) 
+    throw console.log(err);
+
 
     const textFiles = files.filter(file => path.extname(file) === '.txt');
     let globalCount = 0;
@@ -23,16 +26,19 @@ if (isMainThread) {
       const worker = new Worker(__filename, { workerData: { word, file, directory } });
       worker.on('message', count => {
         globalCount += count;
-        workerFinishedCount++;
+        workerFinishedCount ++;
+        // console.log(workerFinishedCount)
 
         // Once all workers have finished, display the global result
         if (workerFinishedCount === workerCount) {
           console.log(`The word "${word}" appears ${globalCount} times in the files`);
+          console.log(workerCount)
         }
       });
     }
   });
 } else {
+  // console.log("FINISH")
   // Worker thread
   const { word, file, directory } = workerData;
   fs.readFile(path.join(directory, file), 'utf8', (err, contents) => {
